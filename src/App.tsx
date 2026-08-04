@@ -27,10 +27,13 @@ import {
   GraduationCap,
   FolderGit2,
   Award,
+  ArrowRight,
   Plus,
   Layers,
   Loader2,
 } from 'lucide-react';
+
+type FormTabKey = SectionKey | 'personalInfo' | 'introduction';
 
 function AppContent() {
   const { showToast } = useToast();
@@ -40,12 +43,14 @@ function AppContent() {
   const [resumes, setResumes] = useState<ResumeData[]>([]);
   const [activeResumeId, setActiveResumeId] = useState<string | null>(null);
   const [activeResume, setActiveResume] = useState<ResumeData | null>(null);
-  const [activeFormTab, setActiveFormTab] = useState<SectionKey | 'personalInfo' | 'introduction'>('personalInfo');
+  const [activeFormTab, setActiveFormTab] = useState<FormTabKey>('personalInfo');
   const [activeMobileTab, setActiveMobileTab] = useState<'editor' | 'preview'>('editor');
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('saved');
   const activeResumeRef = useRef<ResumeData | null>(null);
   const lastSavedSnapshotRef = useRef<string | null>(null);
   const saveTimerRef = useRef<number | null>(null);
+  const editorScrollRef = useRef<HTMLDivElement | null>(null);
+  const formTabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   // Modals state
   const [isAtsCheckOpen, setIsAtsCheckOpen] = useState(false);
@@ -83,6 +88,14 @@ function AppContent() {
   useEffect(() => {
     activeResumeRef.current = activeResume;
   }, [activeResume]);
+
+  useEffect(() => {
+    formTabRefs.current[activeFormTab]?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'center',
+    });
+  }, [activeFormTab]);
 
   const saveActiveResume = async (resumeToSave = activeResume, showSuccessToast = false) => {
     if (!resumeToSave) return;
@@ -227,7 +240,7 @@ function AppContent() {
   }
 
   // Navigation tab definitions
-  const formTabs = [
+  const formTabs: Array<{ id: FormTabKey; label: string; icon: React.ElementType }> = [
     { id: 'personalInfo', label: 'Personal Info', icon: User },
     { id: 'introduction', label: 'Summary', icon: FileText },
     { id: 'workExperience', label: 'Work Experience', icon: Briefcase },
@@ -236,6 +249,14 @@ function AppContent() {
     { id: 'projects', label: 'Projects', icon: FolderGit2 },
     { id: 'certifications', label: 'Certifications', icon: Award },
   ];
+  const activeFormIndex = formTabs.findIndex((tab) => tab.id === activeFormTab);
+  const nextFormTab = activeFormIndex >= 0 ? formTabs[activeFormIndex + 1] : null;
+
+  const handleNextSection = () => {
+    if (!nextFormTab) return;
+    setActiveFormTab(nextFormTab.id);
+    editorScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   if (isCheckingAuth) {
     return (
@@ -338,8 +359,11 @@ function AppContent() {
                   return (
                     <button
                       key={tab.id}
+                      ref={(element) => {
+                        formTabRefs.current[tab.id] = element;
+                      }}
                       type="button"
-                      onClick={() => setActiveFormTab(tab.id as any)}
+                      onClick={() => setActiveFormTab(tab.id)}
                       className={`px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap flex items-center space-x-1.5 transition-all ${
                         isActive
                           ? 'bg-slate-900 text-white shadow-xs'
@@ -356,7 +380,7 @@ function AppContent() {
               </div>
 
               {/* Form Content Area */}
-              <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+              <div ref={editorScrollRef} className="flex-1 overflow-y-auto p-4 sm:p-6">
                 <div className="max-w-2xl mx-auto space-y-6">
                   {activeFormTab === 'personalInfo' && (
                     <div className="space-y-4">
@@ -461,6 +485,19 @@ function AppContent() {
                           setActiveResume({ ...activeResume, certifications: updated })
                         }
                       />
+                    </div>
+                  )}
+
+                  {nextFormTab && (
+                    <div className="flex justify-end border-t border-slate-200 pt-5">
+                      <button
+                        type="button"
+                        onClick={handleNextSection}
+                        className="inline-flex items-center space-x-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-slate-800"
+                      >
+                        <span>Next: {nextFormTab.label}</span>
+                        <ArrowRight className="h-4 w-4" />
+                      </button>
                     </div>
                   )}
                 </div>
