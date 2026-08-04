@@ -4,11 +4,14 @@ import { pdf } from '@react-pdf/renderer';
 import { ResumePdfDocument } from '../pdf/ResumePdfDocument';
 import {
   ArrowLeft,
+  AlertCircle,
   Check,
+  CheckCircle2,
   Coffee,
   Download,
   Edit3,
   Loader2,
+  Save,
   Sliders,
 } from 'lucide-react';
 
@@ -17,6 +20,8 @@ interface Props {
   saveStatus: SaveStatus;
   onBack: () => void;
   onTitleChange: (title: string) => void;
+  onSave: () => void;
+  isGuest: boolean;
   onOpenSectionOrder: () => void;
   onOpenCoffee: () => void;
   activeMobileTab: 'editor' | 'preview';
@@ -26,8 +31,11 @@ interface Props {
 
 export const BuilderHeader: React.FC<Props> = ({
   data,
+  saveStatus,
   onBack,
   onTitleChange,
+  onSave,
+  isGuest,
   onOpenSectionOrder,
   onOpenCoffee,
   activeMobileTab,
@@ -79,6 +87,34 @@ export const BuilderHeader: React.FC<Props> = ({
       setIsGeneratingPdf(false);
     }
   };
+
+  const saveLabel = isGuest
+    ? 'Login to save resume'
+    : saveStatus === 'saving'
+    ? 'Saving...'
+    : 'Save';
+
+  const statusLabel = isGuest
+    ? '(login to save resume)'
+    : saveStatus === 'saved'
+    ? 'Saved'
+    : saveStatus === 'saving'
+    ? 'Saving'
+    : saveStatus === 'error'
+    ? 'Save failed'
+    : 'Unsaved changes';
+
+  const statusClass = isGuest
+    ? 'text-slate-400'
+    : saveStatus === 'saved'
+    ? 'text-emerald-300'
+    : saveStatus === 'saving'
+    ? 'text-blue-300'
+    : saveStatus === 'error'
+    ? 'text-rose-300'
+    : 'text-amber-300';
+
+  const StatusIcon = saveStatus === 'error' ? AlertCircle : saveStatus === 'saved' ? CheckCircle2 : null;
 
   return (
     <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40 shadow-md">
@@ -144,6 +180,27 @@ export const BuilderHeader: React.FC<Props> = ({
 
           {/* Right: Actions & Tools */}
           <div className="flex items-center space-x-2 shrink-0 flex-wrap justify-end gap-y-2">
+            <div className="flex items-center space-x-2 rounded-lg bg-slate-800/80 px-2 py-1">
+              <button
+                type="button"
+                onClick={onSave}
+                disabled={isGuest || saveStatus === 'saving' || saveStatus === 'saved'}
+                className="px-3 py-1.5 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors inline-flex items-center space-x-1.5 disabled:bg-slate-700 disabled:text-slate-400 disabled:opacity-100"
+                title={isGuest ? 'Sign in to save resumes to Supabase' : 'Save resume progress'}
+              >
+                {saveStatus === 'saving' && !isGuest ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Save className="w-3.5 h-3.5" />
+                )}
+                <span>{saveLabel}</span>
+              </button>
+              <span className={`inline-flex items-center whitespace-nowrap text-[11px] font-semibold ${statusClass}`}>
+                {StatusIcon && <StatusIcon className="mr-1 h-3.5 w-3.5" />}
+                {statusLabel}
+              </span>
+            </div>
+
             <button
               type="button"
               onClick={onOpenCoffee}

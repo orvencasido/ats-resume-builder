@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
+import coffeeQrUrl from '../../../assets/orbs-qr.jpg';
 
 interface Props {
   isOpen: boolean;
@@ -37,7 +38,7 @@ export const BuyMeCoffeeModal: React.FC<Props> = ({ isOpen, onClose }) => {
           <X className="h-5 w-5" />
         </button>
         <img
-          src="/assets/orbs-qr.jpg"
+          src={coffeeQrUrl}
           alt="Buy me a coffee QR code"
           className="block max-h-[92vh] max-w-[92vw] rounded-xl object-contain shadow-2xl"
         />
