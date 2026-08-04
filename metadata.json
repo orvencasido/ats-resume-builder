@@ -1,0 +1,6 @@
+{
+  "name": "ATS Resume Builder",
+  "description": "Create, edit, preview, and download professional ATS-friendly resumes with automatic formatting, Supabase persistence, and selectable-text PDF export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
