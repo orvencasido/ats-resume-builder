@@ -1,5 +1,13 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
+const getAppUrl = () => {
+  const configuredUrl = import.meta.env.VITE_APP_URL?.trim();
+  const baseUrl = configuredUrl || window.location.origin;
+  return baseUrl.replace(/\/$/, '');
+};
+
+const getAuthRedirectUrl = (path = '') => `${getAppUrl()}${path}`;
+
 export interface AuthUser {
   id: string;
   email: string;
@@ -37,6 +45,7 @@ export const authService = {
       password,
       options: {
         data: { full_name: fullName },
+        emailRedirectTo: getAuthRedirectUrl(),
       },
     });
 
@@ -108,7 +117,7 @@ export const authService = {
     }
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: getAuthRedirectUrl('/reset-password'),
     });
 
     if (error) return { success: false, error: error.message };
