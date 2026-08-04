@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { SectionKey, PageSize, PageMargins, ResumeLayout } from '../../types';
 import { Modal } from '../ui/Modal';
-import { ArrowUp, ArrowDown, Eye, EyeOff, RotateCcw, Plus, Minus, MoveHorizontal, MoveVertical, Link, Unlink, Type, AlignJustify } from 'lucide-react';
+import { ArrowUp, ArrowDown, Eye, EyeOff, RotateCcw, Plus, Minus, MoveHorizontal, MoveVertical, Type, AlignJustify } from 'lucide-react';
 
 interface Props {
   isOpen: boolean;
@@ -78,8 +78,6 @@ export const SectionOrderModal: React.FC<Props> = ({
   onUpdateFontSize,
   onUpdateLineHeight,
 }) => {
-  const [isLinked, setIsLinked] = useState(false);
-
   const currentMargins = pageMargins || DEFAULT_MARGINS;
   const currentFontSize = fontSize || DEFAULT_FONT_SIZE;
   const currentLineHeight = lineHeight || DEFAULT_LINE_HEIGHT;
@@ -96,19 +94,10 @@ export const SectionOrderModal: React.FC<Props> = ({
 
   const handleMarginChange = (side: keyof PageMargins, value: number) => {
     const clamped = Math.min(Math.max(value, 12), 72);
-    if (isLinked) {
-      onUpdatePageMargins({
-        top: clamped,
-        bottom: clamped,
-        left: clamped,
-        right: clamped,
-      });
-    } else {
-      onUpdatePageMargins({
-        ...currentMargins,
-        [side]: clamped,
-      });
-    }
+    onUpdatePageMargins({
+      ...currentMargins,
+      [side]: clamped,
+    });
   };
 
   const handleMove = (index: number, direction: 'up' | 'down') => {
@@ -135,8 +124,8 @@ export const SectionOrderModal: React.FC<Props> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Resume Layout & Margin Settings" maxWidth="lg">
-      <div className="space-y-6 max-h-[80vh] overflow-y-auto pr-1">
+    <Modal isOpen={isOpen} onClose={onClose} title="Resume Layout & Margin Settings" maxWidth="3xl">
+      <div className="space-y-6 max-h-[calc(100vh-9rem)] overflow-y-auto pr-1 pb-8">
         <div>
           <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
             Resume Header Layout
@@ -219,19 +208,6 @@ export const SectionOrderModal: React.FC<Props> = ({
               </label>
             </div>
             <div className="flex items-center space-x-2">
-              <button
-                type="button"
-                onClick={() => setIsLinked(!isLinked)}
-                className={`p-1.5 text-xs font-medium rounded-lg border transition-colors flex items-center space-x-1 ${
-                  isLinked
-                    ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
-                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100'
-                }`}
-                title={isLinked ? 'Unlink margins (Adjust individually)' : 'Link margins (Adjust all sides together)'}
-              >
-                {isLinked ? <Link className="w-3.5 h-3.5" /> : <Unlink className="w-3.5 h-3.5" />}
-                <span className="hidden sm:inline">{isLinked ? 'Linked' : 'Separate'}</span>
-              </button>
               <button
                 type="button"
                 onClick={handleResetMargins}

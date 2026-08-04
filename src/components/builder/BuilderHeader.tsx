@@ -5,6 +5,7 @@ import { ResumePdfDocument } from '../pdf/ResumePdfDocument';
 import {
   ArrowLeft,
   Check,
+  Coffee,
   Download,
   Edit3,
   Loader2,
@@ -17,6 +18,7 @@ interface Props {
   onBack: () => void;
   onTitleChange: (title: string) => void;
   onOpenSectionOrder: () => void;
+  onOpenCoffee: () => void;
   activeMobileTab: 'editor' | 'preview';
   onMobileTabChange: (tab: 'editor' | 'preview') => void;
   completionPercentage: number;
@@ -27,6 +29,7 @@ export const BuilderHeader: React.FC<Props> = ({
   onBack,
   onTitleChange,
   onOpenSectionOrder,
+  onOpenCoffee,
   activeMobileTab,
   onMobileTabChange,
   completionPercentage,
@@ -141,6 +144,15 @@ export const BuilderHeader: React.FC<Props> = ({
 
           {/* Right: Actions & Tools */}
           <div className="flex items-center space-x-2 shrink-0 flex-wrap justify-end gap-y-2">
+            <button
+              type="button"
+              onClick={onOpenCoffee}
+              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition-colors inline-flex items-center space-x-1.5"
+            >
+              <Coffee className="w-3.5 h-3.5 text-amber-300" />
+              <span>Buy me a coffee</span>
+            </button>
+
             {/* Layout & Section Settings */}
             <button
               onClick={onOpenSectionOrder}
