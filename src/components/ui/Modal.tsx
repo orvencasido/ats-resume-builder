@@ -6,7 +6,7 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl';
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -37,12 +37,14 @@ export const Modal: React.FC<ModalProps> = ({
     md: 'max-w-md',
     lg: 'max-w-lg',
     xl: 'max-w-xl',
+    '2xl': 'max-w-2xl',
+    '3xl': 'max-w-3xl',
   }[maxWidth];
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center px-4 py-6 sm:py-10">
       <div
-        className={`w-full ${widthClasses} bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all`}
+        className={`w-full ${widthClasses} max-h-[calc(100vh-3rem)] sm:max-h-[calc(100vh-5rem)] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all`}
         role="dialog"
         aria-modal="true"
       >

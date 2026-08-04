@@ -18,6 +18,7 @@ import { AtsCheckPanel } from './components/builder/AtsCheckPanel';
 import { SectionOrderModal } from './components/builder/SectionOrderModal';
 import { ResumePreview } from './components/preview/ResumePreview';
 import { ToastProvider, useToast } from './components/ui/Toast';
+import { BuyMeCoffeeModal } from './components/ui/BuyMeCoffeeModal';
 import {
   User,
   FileText,
@@ -46,6 +47,7 @@ function AppContent() {
   // Modals state
   const [isAtsCheckOpen, setIsAtsCheckOpen] = useState(false);
   const [isSectionOrderOpen, setIsSectionOrderOpen] = useState(false);
+  const [isCoffeeOpen, setIsCoffeeOpen] = useState(false);
 
   if (window.location.pathname === '/reset-password') {
     return <ResetPasswordPage />;
@@ -203,6 +205,7 @@ function AppContent() {
             user={user}
             onLogout={handleLogout}
             onCreateNew={handleCreateNewResume}
+            onOpenCoffee={() => setIsCoffeeOpen(true)}
           />
 
           <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex-1 w-full">
@@ -255,7 +258,7 @@ function AppContent() {
               setActiveResume({ ...activeResume, title: newTitle });
             }}
             onOpenSectionOrder={() => setIsSectionOrderOpen(true)}
-            onOpenAtsCheck={() => setIsAtsCheckOpen(true)}
+            onOpenCoffee={() => setIsCoffeeOpen(true)}
             activeMobileTab={activeMobileTab}
             onMobileTabChange={setActiveMobileTab}
             completionPercentage={completionPercentage}
@@ -463,6 +466,11 @@ function AppContent() {
           />
         </div>
       )}
+
+      <BuyMeCoffeeModal
+        isOpen={isCoffeeOpen}
+        onClose={() => setIsCoffeeOpen(false)}
+      />
     </div>
   );
 }
