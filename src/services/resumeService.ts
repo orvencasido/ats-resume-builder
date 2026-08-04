@@ -188,7 +188,7 @@ export const resumeService = {
     return resume;
   },
 
-  async saveResume(resume: ResumeData): Promise<{ success: boolean; error?: string }> {
+  async saveResume(resume: ResumeData): Promise<{ success: boolean; error?: string; resume?: ResumeData }> {
     const updatedAt = new Date().toISOString();
     const updatedResume = { ...resume, updatedAt };
 
@@ -199,7 +199,7 @@ export const resumeService = {
         ? resumes.map((item) => item.id === resume.id ? updatedResume : item)
         : [updatedResume, ...resumes];
       saveGuestResumes(resume.userId, next);
-      return { success: true };
+      return { success: true, resume: updatedResume };
     }
 
     if (!isSupabaseConfigured) {
@@ -215,7 +215,7 @@ export const resumeService = {
       return { success: false, error: error.message };
     }
 
-    return { success: true };
+    return { success: true, resume: updatedResume };
   },
 
   async deleteResume(resumeId: string, userId: string): Promise<boolean> {

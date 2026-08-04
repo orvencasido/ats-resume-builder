@@ -8,6 +8,23 @@ const getAppUrl = () => {
 
 const getAuthRedirectUrl = (path = '') => `${getAppUrl()}${path}`;
 
+const getPasswordResetLinkError = () => {
+  const hash = window.location.hash.replace(/^#/, '');
+  if (!hash) return null;
+
+  const params = new URLSearchParams(hash);
+  const errorCode = params.get('error_code');
+  const errorDescription = params.get('error_description') || params.get('error');
+
+  if (!errorCode && !errorDescription) return null;
+
+  if (errorCode === 'otp_expired') {
+    return 'Reset link is invalid or expired. Request a new password reset email.';
+  }
+
+  return errorDescription || 'Reset link is invalid. Request a new password reset email.';
+};
+
 export interface AuthUser {
   id: string;
   email: string;
@@ -127,6 +144,12 @@ export const authService = {
   async preparePasswordReset(): Promise<{ success: boolean; error: string | null }> {
     if (!isSupabaseConfigured) {
       return { success: false, error: 'Supabase is not configured. Password reset is unavailable.' };
+    }
+
+    const linkError = getPasswordResetLinkError();
+    if (linkError) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return { success: false, error: linkError };
     }
 
     const code = new URLSearchParams(window.location.search).get('code');

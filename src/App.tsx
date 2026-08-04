@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ResumeData, SaveStatus, SectionKey } from './types';
 import { authService, AuthUser } from './services/authService';
 import { resumeService } from './services/resumeService';
@@ -43,6 +43,9 @@ function AppContent() {
   const [activeFormTab, setActiveFormTab] = useState<SectionKey | 'personalInfo' | 'introduction'>('personalInfo');
   const [activeMobileTab, setActiveMobileTab] = useState<'editor' | 'preview'>('editor');
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('saved');
+  const activeResumeRef = useRef<ResumeData | null>(null);
+  const lastSavedSnapshotRef = useRef<string | null>(null);
+  const saveTimerRef = useRef<number | null>(null);
 
   // Modals state
   const [isAtsCheckOpen, setIsAtsCheckOpen] = useState(false);
@@ -72,6 +75,52 @@ function AppContent() {
     setResumes(list);
   };
 
+  const getResumeSnapshot = (resume: ResumeData) => {
+    const { updatedAt, ...content } = resume;
+    return JSON.stringify(content);
+  };
+
+  useEffect(() => {
+    activeResumeRef.current = activeResume;
+  }, [activeResume]);
+
+  const saveActiveResume = async (resumeToSave = activeResume, showSuccessToast = false) => {
+    if (!resumeToSave) return;
+
+    if (saveTimerRef.current) {
+      window.clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+    }
+
+    const savingSnapshot = getResumeSnapshot(resumeToSave);
+    setSaveStatus('saving');
+    const res = await resumeService.saveResume(resumeToSave);
+
+    if (res.success && res.resume) {
+      lastSavedSnapshotRef.current = getResumeSnapshot(res.resume);
+      const currentResume = activeResumeRef.current;
+      const hasNewerLocalChanges = currentResume?.id === res.resume.id
+        && getResumeSnapshot(currentResume) !== savingSnapshot;
+
+      if (!hasNewerLocalChanges) {
+        setActiveResume((current) =>
+          current?.id === res.resume?.id ? res.resume : current
+        );
+      }
+      setResumes((prev) =>
+        prev.map((item) => (item.id === res.resume?.id ? res.resume : item))
+      );
+      setSaveStatus(hasNewerLocalChanges ? 'unsaved' : 'saved');
+      if (showSuccessToast) {
+        showToast('Resume saved', 'Your latest progress is synced.', 'success');
+      }
+      return;
+    }
+
+    setSaveStatus('error');
+    showToast('Save failed', res.error || 'Failed to sync resume changes', 'error');
+  };
+
   const handleAuthSuccess = async (loggedInUser: AuthUser) => {
     setUser(loggedInUser);
     await loadResumes(loggedInUser.id);
@@ -95,28 +144,31 @@ function AppContent() {
   useEffect(() => {
     if (!activeResume) return;
 
+    const currentSnapshot = getResumeSnapshot(activeResume);
+    if (currentSnapshot === lastSavedSnapshotRef.current) {
+      setSaveStatus('saved');
+      return;
+    }
+
     setSaveStatus('unsaved');
-    const timer = setTimeout(async () => {
-      setSaveStatus('saving');
-      const res = await resumeService.saveResume(activeResume);
-      if (res.success) {
-        setSaveStatus('saved');
-        setResumes((prev) =>
-          prev.map((r) => (r.id === activeResume.id ? activeResume : r))
-        );
-      } else {
-        setSaveStatus('error');
-        showToast('Save failed', res.error || 'Failed to sync resume changes', 'error');
-      }
+    saveTimerRef.current = window.setTimeout(() => {
+      saveActiveResume(activeResume);
     }, 800);
 
-    return () => clearTimeout(timer);
+    return () => {
+      if (saveTimerRef.current) {
+        window.clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = null;
+      }
+    };
   }, [activeResume]);
 
   const handleSelectResume = async (id: string) => {
     if (!user) return;
     const item = await resumeService.getResumeById(id, user.id);
     if (item) {
+      lastSavedSnapshotRef.current = getResumeSnapshot(item);
+      setSaveStatus('saved');
       setActiveResumeId(id);
       setActiveResume(item);
     }
@@ -127,6 +179,8 @@ function AppContent() {
     const title = `Resume #${resumes.length + 1}`;
     try {
       const newResume = await resumeService.createResume(user.id, title);
+      lastSavedSnapshotRef.current = getResumeSnapshot(newResume);
+      setSaveStatus('saved');
       setResumes([newResume, ...resumes]);
       setActiveResumeId(newResume.id);
       setActiveResume(newResume);
@@ -257,6 +311,8 @@ function AppContent() {
             onTitleChange={(newTitle) => {
               setActiveResume({ ...activeResume, title: newTitle });
             }}
+            onSave={() => saveActiveResume(activeResume, true)}
+            isGuest={Boolean(user.isGuest)}
             onOpenSectionOrder={() => setIsSectionOrderOpen(true)}
             onOpenCoffee={() => setIsCoffeeOpen(true)}
             activeMobileTab={activeMobileTab}
