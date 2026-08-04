@@ -49,7 +49,7 @@ export const AuthPage: React.FC<Props> = ({ onSuccess }) => {
         if (res.error) {
           setError(res.error);
         } else {
-          setSuccessMessage('Account created. Sign in to continue.');
+          setSuccessMessage('Account created. Please verify via email before signing in.');
           setMode('login');
           setFullName('');
           setEmail('');

@@ -28,6 +28,11 @@ export const DashboardHeader: React.FC<Props> = ({ user, onLogout, onCreateNew, 
               <p className="text-xs text-slate-500">
                 {user?.email || 'Manage your professional ATS resumes'}
               </p>
+              {user?.isGuest && (
+                <p className="mt-0.5 text-[11px] font-medium text-amber-700">
+                  Guest session. Login to keep changes after refresh.
+                </p>
+              )}
             </div>
           </div>
 

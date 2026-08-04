@@ -174,6 +174,11 @@ export const BuilderHeader: React.FC<Props> = ({
                     />
                   </div>
                 </div>
+                {isGuest && (
+                  <span className="hidden sm:inline text-[11px] font-medium text-amber-300">
+                    Guest session. Login to keep changes.
+                  </span>
+                )}
               </div>
             </div>
           </div>
