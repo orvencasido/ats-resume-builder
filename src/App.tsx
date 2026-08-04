@@ -3,6 +3,7 @@ import { ResumeData, SaveStatus, SectionKey } from './types';
 import { authService, AuthUser } from './services/authService';
 import { resumeService } from './services/resumeService';
 import { AuthPage } from './components/auth/AuthPage';
+import { ResetPasswordPage } from './components/auth/ResetPasswordPage';
 import { DashboardHeader } from './components/dashboard/DashboardHeader';
 import { ResumeCard } from './components/dashboard/ResumeCard';
 import { BuilderHeader } from './components/builder/BuilderHeader';
@@ -15,10 +16,8 @@ import { ProjectsForm } from './components/builder/ProjectsForm';
 import { CertificationsForm } from './components/builder/CertificationsForm';
 import { AtsCheckPanel } from './components/builder/AtsCheckPanel';
 import { SectionOrderModal } from './components/builder/SectionOrderModal';
-import { SampleDataModal } from './components/builder/SampleDataModal';
 import { ResumePreview } from './components/preview/ResumePreview';
 import { ToastProvider, useToast } from './components/ui/Toast';
-import { SAMPLE_RESUME } from './data/sampleData';
 import {
   User,
   FileText,
@@ -28,11 +27,7 @@ import {
   FolderGit2,
   Award,
   Plus,
-  Sparkles,
   Layers,
-  ArrowRight,
-  ShieldCheck,
-  CheckCircle2,
   Loader2,
 } from 'lucide-react';
 
@@ -51,7 +46,10 @@ function AppContent() {
   // Modals state
   const [isAtsCheckOpen, setIsAtsCheckOpen] = useState(false);
   const [isSectionOrderOpen, setIsSectionOrderOpen] = useState(false);
-  const [isSampleDataOpen, setIsSampleDataOpen] = useState(false);
+
+  if (window.location.pathname === '/reset-password') {
+    return <ResetPasswordPage />;
+  }
 
   // Initialize user session & load resumes
   useEffect(() => {
@@ -69,19 +67,17 @@ function AppContent() {
 
   const loadResumes = async (userId: string) => {
     const list = await resumeService.getResumes(userId);
-    if (list.length === 0) {
-      // Create initial sample resume if empty
-      const sample = await resumeService.createResume(userId, 'Software Engineering Resume', true);
-      setResumes([sample]);
-    } else {
-      setResumes(list);
-    }
+    setResumes(list);
   };
 
   const handleAuthSuccess = async (loggedInUser: AuthUser) => {
     setUser(loggedInUser);
     await loadResumes(loggedInUser.id);
-    showToast('Welcome!', `Signed in as ${loggedInUser.fullName || loggedInUser.email}`, 'success');
+    showToast(
+      loggedInUser.isGuest ? 'Guest Mode' : 'Welcome!',
+      loggedInUser.isGuest ? 'Progress is kept only until refresh.' : `Signed in as ${loggedInUser.fullName || loggedInUser.email}`,
+      'success'
+    );
   };
 
   const handleLogout = async () => {
@@ -127,11 +123,15 @@ function AppContent() {
   const handleCreateNewResume = async () => {
     if (!user) return;
     const title = `Resume #${resumes.length + 1}`;
-    const newResume = await resumeService.createResume(user.id, title, true);
-    setResumes([newResume, ...resumes]);
-    setActiveResumeId(newResume.id);
-    setActiveResume(newResume);
-    showToast('New Resume Created', 'Sample ATS resume template initialized.', 'success');
+    try {
+      const newResume = await resumeService.createResume(user.id, title);
+      setResumes([newResume, ...resumes]);
+      setActiveResumeId(newResume.id);
+      setActiveResume(newResume);
+      showToast('New Resume Created', 'Blank resume initialized.', 'success');
+    } catch (error: any) {
+      showToast('Create failed', error?.message || 'Unable to create resume.', 'error');
+    }
   };
 
   const handleDuplicateResume = async (id: string) => {
@@ -155,21 +155,6 @@ function AppContent() {
       }
       showToast('Resume Deleted', 'The resume has been removed.', 'info');
     }
-  };
-
-  const handleLoadSampleData = () => {
-    if (!activeResume) return;
-    setActiveResume({
-      ...activeResume,
-      personalInfo: SAMPLE_RESUME.personalInfo,
-      introduction: SAMPLE_RESUME.introduction,
-      workExperiences: SAMPLE_RESUME.workExperiences,
-      technicalSkills: SAMPLE_RESUME.technicalSkills,
-      education: SAMPLE_RESUME.education,
-      projects: SAMPLE_RESUME.projects,
-      certifications: SAMPLE_RESUME.certifications,
-    });
-    showToast('Sample Data Loaded', 'Sample resume content populated.', 'success');
   };
 
   // Completion calculation for active resume
@@ -221,35 +206,6 @@ function AppContent() {
           />
 
           <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex-1 w-full">
-            {/* Hero welcome card */}
-            <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 mb-8 shadow-xl relative overflow-hidden">
-              <div className="relative z-10 max-w-2xl">
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 mb-4">
-                  <Sparkles className="w-3.5 h-3.5 mr-1 text-indigo-400" />
-                  ATS-Friendly Document Generator
-                </span>
-                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-2">
-                  Build Resumes That Get Past Applicant Tracking Systems
-                </h2>
-                <p className="text-slate-300 text-sm leading-relaxed mb-6">
-                  Create clean, machine-readable resume PDF documents formatted strictly according to corporate HR ATS standards. Fully customizable, instant PDF downloads, selectable vector text, and cloud sync.
-                </p>
-                <button
-                  type="button"
-                  onClick={handleCreateNewResume}
-                  className="px-5 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-xl transition-all shadow-lg inline-flex items-center space-x-2"
-                >
-                  <Plus className="w-5 h-5" />
-                  <span>Create Professional Resume</span>
-                </button>
-              </div>
-
-              {/* Decorative accent background shapes */}
-              <div className="absolute -right-12 -bottom-12 w-80 h-80 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute right-40 -top-20 w-60 h-60 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
-            </div>
-
-            {/* Resume grid section */}
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-slate-900 flex items-center space-x-2">
                 <Layers className="w-5 h-5 text-indigo-600" />
@@ -261,13 +217,10 @@ function AppContent() {
               <div className="bg-white border-2 border-dashed border-slate-300 rounded-3xl p-12 text-center max-w-lg mx-auto my-8">
                 <FileText className="w-12 h-12 text-slate-400 mx-auto mb-3" />
                 <h4 className="font-bold text-slate-800 text-base mb-1">No Resumes Found</h4>
-                <p className="text-slate-500 text-xs mb-6">
-                  Start building your first ATS-optimized resume in minutes.
-                </p>
                 <button
                   type="button"
                   onClick={handleCreateNewResume}
-                  className="px-4 py-2 bg-indigo-600 text-white text-xs font-semibold rounded-xl hover:bg-indigo-500 transition-colors inline-flex items-center space-x-1.5"
+                  className="mt-5 px-4 py-2 bg-indigo-600 text-white text-xs font-semibold rounded-xl hover:bg-indigo-500 transition-colors inline-flex items-center space-x-1.5"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Create First Resume</span>
@@ -303,7 +256,6 @@ function AppContent() {
             }}
             onOpenSectionOrder={() => setIsSectionOrderOpen(true)}
             onOpenAtsCheck={() => setIsAtsCheckOpen(true)}
-            onOpenSampleData={() => setIsSampleDataOpen(true)}
             activeMobileTab={activeMobileTab}
             onMobileTabChange={setActiveMobileTab}
             completionPercentage={completionPercentage}
@@ -351,14 +303,19 @@ function AppContent() {
                     <div className="space-y-4">
                       <div className="border-b border-slate-200 pb-3">
                         <h2 className="text-lg font-bold text-slate-900">Personal Contact Information</h2>
-                        <p className="text-xs text-slate-500">
-                          Primary candidate details displayed at the top of your ATS document header.
-                        </p>
                       </div>
                       <PersonalDetailsForm
                         data={activeResume.personalInfo}
+                        profileImage={activeResume.profileImage}
                         onChange={(updated) =>
                           setActiveResume({ ...activeResume, personalInfo: updated })
+                        }
+                        onProfileImageChange={(updated) =>
+                          setActiveResume({
+                            ...activeResume,
+                            profileImage: updated,
+                            layout: updated ? 'photo' : activeResume.layout,
+                          })
                         }
                       />
                     </div>
@@ -368,9 +325,6 @@ function AppContent() {
                     <div className="space-y-4">
                       <div className="border-b border-slate-200 pb-3">
                         <h2 className="text-lg font-bold text-slate-900">Professional Summary</h2>
-                        <p className="text-xs text-slate-500">
-                          A high-impact 2-4 sentence opening statement summarizing core skills and experience.
-                        </p>
                       </div>
                       <IntroductionForm
                         value={activeResume.introduction}
@@ -385,9 +339,6 @@ function AppContent() {
                     <div className="space-y-4">
                       <div className="border-b border-slate-200 pb-3">
                         <h2 className="text-lg font-bold text-slate-900">Work Experience</h2>
-                        <p className="text-xs text-slate-500">
-                          Add job roles, company names, employment dates, and action-oriented achievement bullet points.
-                        </p>
                       </div>
                       <WorkExperienceForm
                         items={activeResume.workExperiences}
@@ -402,9 +353,6 @@ function AppContent() {
                     <div className="space-y-4">
                       <div className="border-b border-slate-200 pb-3">
                         <h2 className="text-lg font-bold text-slate-900">Technical Skills</h2>
-                        <p className="text-xs text-slate-500">
-                          Organize your technical proficiencies, frameworks, languages, and tools into categories.
-                        </p>
                       </div>
                       <TechnicalSkillsForm
                         items={activeResume.technicalSkills}
@@ -419,9 +367,6 @@ function AppContent() {
                     <div className="space-y-4">
                       <div className="border-b border-slate-200 pb-3">
                         <h2 className="text-lg font-bold text-slate-900">Education</h2>
-                        <p className="text-xs text-slate-500">
-                          Academic degrees, majors, university names, and graduation dates.
-                        </p>
                       </div>
                       <EducationForm
                         items={activeResume.education}
@@ -436,9 +381,6 @@ function AppContent() {
                     <div className="space-y-4">
                       <div className="border-b border-slate-200 pb-3">
                         <h2 className="text-lg font-bold text-slate-900">Projects</h2>
-                        <p className="text-xs text-slate-500">
-                          Key engineering projects, open-source work, or portfolio achievements.
-                        </p>
                       </div>
                       <ProjectsForm
                         items={activeResume.projects}
@@ -453,9 +395,6 @@ function AppContent() {
                     <div className="space-y-4">
                       <div className="border-b border-slate-200 pb-3">
                         <h2 className="text-lg font-bold text-slate-900">Certifications</h2>
-                        <p className="text-xs text-slate-500">
-                          Professional licenses, cloud certifications (AWS, Azure, GCP), and credentials.
-                        </p>
                       </div>
                       <CertificationsForm
                         items={activeResume.certifications}
@@ -486,6 +425,7 @@ function AppContent() {
             sectionOrder={activeResume.sectionOrder}
             hiddenSections={activeResume.hiddenSections}
             pageSize={activeResume.pageSize}
+            layout={activeResume.layout}
             pageMargins={activeResume.pageMargins}
             fontSize={activeResume.fontSize}
             lineHeight={activeResume.lineHeight}
@@ -502,6 +442,9 @@ function AppContent() {
             onUpdatePageSize={(size) =>
               setActiveResume({ ...activeResume, pageSize: size })
             }
+            onUpdateLayout={(layout) =>
+              setActiveResume({ ...activeResume, layout })
+            }
             onUpdatePageMargins={(margins) =>
               setActiveResume({ ...activeResume, pageMargins: margins })
             }
@@ -517,13 +460,6 @@ function AppContent() {
             isOpen={isAtsCheckOpen}
             onClose={() => setIsAtsCheckOpen(false)}
             data={activeResume}
-          />
-
-          {/* Load Sample Data Confirmation Modal */}
-          <SampleDataModal
-            isOpen={isSampleDataOpen}
-            onClose={() => setIsSampleDataOpen(false)}
-            onConfirm={handleLoadSampleData}
           />
         </div>
       )}

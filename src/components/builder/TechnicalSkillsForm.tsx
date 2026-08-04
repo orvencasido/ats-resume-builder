@@ -56,10 +56,6 @@ export const TechnicalSkillsForm: React.FC<Props> = ({ items, onChange }) => {
 
   return (
     <div className="space-y-4">
-      <p className="text-xs text-slate-500 mb-2">
-        Group your technical competencies into clear categories. Skills are rendered as bullet items with the bold category title followed by your comma-separated tools.
-      </p>
-
       {items.map((item, index) => (
         <div
           key={item.id || index}

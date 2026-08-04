@@ -29,9 +29,6 @@ export const AtsCheckPanel: React.FC<Props> = ({ isOpen, onClose, data }) => {
               <Sparkles className="w-5 h-5 text-amber-400" />
               <h4 className="font-semibold text-base">ATS Compatibility Rating</h4>
             </div>
-            <p className="text-xs text-slate-300">
-              Evaluates document structure, contact data, achievement bullets, and font compliance.
-            </p>
           </div>
 
           <div className="text-right">

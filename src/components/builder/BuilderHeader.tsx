@@ -5,7 +5,6 @@ import { ResumePdfDocument } from '../pdf/ResumePdfDocument';
 import {
   ArrowLeft,
   Check,
-  Cloud,
   Download,
   Edit3,
   Loader2,
@@ -18,8 +17,6 @@ interface Props {
   onBack: () => void;
   onTitleChange: (title: string) => void;
   onOpenSectionOrder: () => void;
-  onOpenAtsCheck?: () => void;
-  onOpenSampleData?: () => void;
   activeMobileTab: 'editor' | 'preview';
   onMobileTabChange: (tab: 'editor' | 'preview') => void;
   completionPercentage: number;
@@ -27,7 +24,6 @@ interface Props {
 
 export const BuilderHeader: React.FC<Props> = ({
   data,
-  saveStatus,
   onBack,
   onTitleChange,
   onOpenSectionOrder,
@@ -128,20 +124,8 @@ export const BuilderHeader: React.FC<Props> = ({
                 )}
               </div>
 
-              {/* Save status & Progress bar */}
+              {/* Progress bar */}
               <div className="flex items-center space-x-3 text-xs mt-0.5">
-                <div className="flex items-center space-x-1.5 text-slate-400">
-                  <Cloud className="w-3.5 h-3.5" />
-                  <span>
-                    {saveStatus === 'saving' && 'Saving...'}
-                    {saveStatus === 'saved' && 'Saved'}
-                    {saveStatus === 'unsaved' && 'Unsaved changes'}
-                    {saveStatus === 'error' && 'Save failed'}
-                  </span>
-                </div>
-
-                <span className="text-slate-600">•</span>
-
                 <div className="flex items-center space-x-1.5 text-slate-300">
                   <span className="text-[11px] font-medium">{completionPercentage}% Completed</span>
                   <div className="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">

@@ -4,6 +4,7 @@ import {
   Page,
   Text,
   View,
+  Image as PdfImage,
   StyleSheet,
   Font,
   Link,
@@ -76,6 +77,75 @@ const createPdfStyles = (
       color: '#222222',
       marginTop: 4,
       paddingHorizontal: 8,
+    },
+    photoHeaderContainer: {
+      marginBottom: 12,
+    },
+    photoHeaderTop: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: 7,
+      paddingRight: 2,
+    },
+    photoHeaderContent: {
+      flex: 1,
+      minHeight: 84,
+      paddingRight: 14,
+      justifyContent: 'center',
+    },
+    photoName: {
+      fontSize: Math.round(baseFontSize * 2.04 * 10) / 10,
+      lineHeight: 1.15,
+      fontWeight: 'bold',
+      textTransform: 'uppercase',
+      letterSpacing: 0.8,
+      marginBottom: 5,
+      color: '#000000',
+      textAlign: 'left',
+    },
+    photoContactRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      alignItems: 'center',
+    },
+    photoContactItem: {
+      fontSize: Math.round(baseFontSize * 0.97 * 10) / 10,
+      lineHeight: 1.25,
+      fontWeight: 'bold',
+      color: '#111111',
+      textDecoration: 'none',
+    },
+    photoIntroduction: {
+      fontSize: baseFontSize,
+      lineHeight: baseLineHeight,
+      textAlign: 'left',
+      color: '#222222',
+      marginTop: 2,
+      paddingTop: 7,
+      borderTopWidth: 1,
+      borderTopColor: '#222222',
+    },
+    photoFrame: {
+      width: 84,
+      height: 84,
+      borderWidth: 1,
+      borderColor: '#222222',
+      backgroundColor: '#ffffff',
+      marginLeft: 18,
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'hidden',
+    },
+    profileImage: {
+      width: 80,
+      height: 80,
+      objectFit: 'cover',
+    },
+    photoPlaceholder: {
+      width: 80,
+      height: 80,
+      backgroundColor: '#f1f5f9',
     },
     section: {
       marginTop: 12,
@@ -186,6 +256,8 @@ export const ResumePdfDocument: React.FC<Props> = ({ data }) => {
     education,
     projects,
     certifications,
+    layout = 'classic',
+    profileImage,
     pageSize = 'A4',
     pageMargins = { top: 36, bottom: 36, left: 42, right: 42 },
     fontSize = 9.8,
@@ -354,34 +426,77 @@ export const ResumePdfDocument: React.FC<Props> = ({ data }) => {
     },
   ];
 
-  return (
-    <Document title={`${personalInfo.fullName || 'Resume'} - ATS Resume`}>
-      <Page size={pageSize === 'LETTER' ? 'LETTER' : 'A4'} style={dynamicPageStyle}>
-        {/* HEADER */}
-        <View style={styles.headerContainer}>
-          <Text style={styles.name}>{personalInfo.fullName || 'YOUR NAME'}</Text>
-          
+  const renderClassicHeader = () => (
+    <View style={styles.headerContainer}>
+      <Text style={styles.name}>{personalInfo.fullName || 'YOUR NAME'}</Text>
+
+      {contactParts.length > 0 && (
+        <View style={styles.contactRow}>
+          {contactParts.map((item, index) => (
+            <React.Fragment key={index}>
+              {index > 0 && <Text style={styles.separator}>|</Text>}
+              {item.isLink && item.href ? (
+                <Link src={item.href} style={[styles.contactItem, { textDecoration: 'none' }]}>
+                  {item.label}
+                </Link>
+              ) : (
+                <Text style={styles.contactItem}>{item.label}</Text>
+              )}
+            </React.Fragment>
+          ))}
+        </View>
+      )}
+
+      {introduction?.trim() ? (
+        <Text style={styles.introduction}>{introduction.trim()}</Text>
+      ) : null}
+    </View>
+  );
+
+  const renderPhotoHeader = () => (
+    <View style={styles.photoHeaderContainer}>
+      <View style={styles.photoHeaderTop}>
+        <View style={styles.photoHeaderContent}>
+          <Text style={styles.photoName}>{personalInfo.fullName || 'YOUR NAME'}</Text>
+
           {contactParts.length > 0 && (
-            <View style={styles.contactRow}>
+            <View style={styles.photoContactRow}>
               {contactParts.map((item, index) => (
                 <React.Fragment key={index}>
                   {index > 0 && <Text style={styles.separator}>|</Text>}
                   {item.isLink && item.href ? (
-                    <Link src={item.href} style={[styles.contactItem, { textDecoration: 'none' }]}>
+                    <Link src={item.href} style={[styles.photoContactItem, { textDecoration: 'none' }]}>
                       {item.label}
                     </Link>
                   ) : (
-                    <Text style={styles.contactItem}>{item.label}</Text>
+                    <Text style={styles.photoContactItem}>{item.label}</Text>
                   )}
                 </React.Fragment>
               ))}
             </View>
           )}
-
-          {introduction?.trim() ? (
-            <Text style={styles.introduction}>{introduction.trim()}</Text>
-          ) : null}
         </View>
+
+        <View style={styles.photoFrame}>
+          {profileImage?.croppedDataUrl ? (
+            <PdfImage src={profileImage.croppedDataUrl} style={styles.profileImage} />
+          ) : (
+            <View style={styles.photoPlaceholder} />
+          )}
+        </View>
+      </View>
+
+      {introduction?.trim() ? (
+        <Text style={styles.photoIntroduction}>{introduction.trim()}</Text>
+      ) : null}
+    </View>
+  );
+
+  return (
+    <Document title={`${personalInfo.fullName || 'Resume'} - ATS Resume`}>
+      <Page size={pageSize === 'LETTER' ? 'LETTER' : 'A4'} style={dynamicPageStyle}>
+        {/* HEADER */}
+        {layout === 'photo' ? renderPhotoHeader() : renderClassicHeader()}
 
         {/* SECTIONS IN USER SPECIFIED ORDER */}
         {sectionOrder.map((key) => renderSection(key))}

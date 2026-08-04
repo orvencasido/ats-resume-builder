@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SectionKey, PageSize, PageMargins } from '../../types';
+import { SectionKey, PageSize, PageMargins, ResumeLayout } from '../../types';
 import { Modal } from '../ui/Modal';
 import { ArrowUp, ArrowDown, Eye, EyeOff, RotateCcw, Plus, Minus, MoveHorizontal, MoveVertical, Link, Unlink, Type, AlignJustify } from 'lucide-react';
 
@@ -9,12 +9,14 @@ interface Props {
   sectionOrder: SectionKey[];
   hiddenSections: SectionKey[];
   pageSize: PageSize;
+  layout?: ResumeLayout;
   pageMargins?: PageMargins;
   fontSize?: number;
   lineHeight?: number;
   onUpdateOrder: (newOrder: SectionKey[]) => void;
   onToggleHide: (key: SectionKey) => void;
   onUpdatePageSize: (size: PageSize) => void;
+  onUpdateLayout: (layout: ResumeLayout) => void;
   onUpdatePageMargins: (margins: PageMargins) => void;
   onUpdateFontSize: (fontSize: number) => void;
   onUpdateLineHeight: (lineHeight: number) => void;
@@ -64,12 +66,14 @@ export const SectionOrderModal: React.FC<Props> = ({
   sectionOrder,
   hiddenSections,
   pageSize,
+  layout = 'classic',
   pageMargins = DEFAULT_MARGINS,
   fontSize = DEFAULT_FONT_SIZE,
   lineHeight = DEFAULT_LINE_HEIGHT,
   onUpdateOrder,
   onToggleHide,
   onUpdatePageSize,
+  onUpdateLayout,
   onUpdatePageMargins,
   onUpdateFontSize,
   onUpdateLineHeight,
@@ -133,6 +137,39 @@ export const SectionOrderModal: React.FC<Props> = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Resume Layout & Margin Settings" maxWidth="lg">
       <div className="space-y-6 max-h-[80vh] overflow-y-auto pr-1">
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+            Resume Header Layout
+          </label>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => onUpdateLayout('classic')}
+              className={`rounded-xl border p-3 text-left transition-all ${
+                layout === 'classic'
+                  ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
+                  : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+              }`}
+            >
+              <div className="text-sm font-semibold">Classic ATS</div>
+              <div className="mt-0.5 text-xs opacity-75">Centered name and contact line, no profile image.</div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onUpdateLayout('photo')}
+              className={`rounded-xl border p-3 text-left transition-all ${
+                layout === 'photo'
+                  ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
+                  : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+              }`}
+            >
+              <div className="text-sm font-semibold">Photo Header</div>
+              <div className="mt-0.5 text-xs opacity-75">Contact details on the left with a 1x1 image on the upper right.</div>
+            </button>
+          </div>
+        </div>
+
         {/* Page Format Selector */}
         <div>
           <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
@@ -180,9 +217,6 @@ export const SectionOrderModal: React.FC<Props> = ({
               <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider">
                 Document Page Margins
               </label>
-              <p className="text-[11px] text-slate-500">
-                Adjust top, bottom, left, and right spacing for ATS readability and page fitting.
-              </p>
             </div>
             <div className="flex items-center space-x-2">
               <button
@@ -407,9 +441,6 @@ export const SectionOrderModal: React.FC<Props> = ({
               <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider">
                 Typography & Line Height Spacing
               </label>
-              <p className="text-[11px] text-slate-500">
-                Adjust text size and line spacing to expand or fit your resume onto fewer or more pages.
-              </p>
             </div>
             <button
               type="button"
@@ -621,15 +652,6 @@ export const SectionOrderModal: React.FC<Props> = ({
           </div>
         </div>
 
-        <div className="pt-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-full py-2.5 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-800 transition-colors shadow-xs"
-          >
-            Apply Layout Settings
-          </button>
-        </div>
       </div>
     </Modal>
   );

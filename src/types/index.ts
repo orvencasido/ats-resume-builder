@@ -1,5 +1,7 @@
 export type PageSize = 'A4' | 'LETTER';
 
+export type ResumeLayout = 'classic' | 'photo';
+
 export type SectionKey = 
   | 'workExperience'
   | 'technicalSkills'
@@ -12,6 +14,14 @@ export interface PersonalInfo {
   email: string;
   phone: string;
   website: string;
+}
+
+export interface ProfileImage {
+  originalDataUrl: string;
+  croppedDataUrl: string;
+  zoom: number;
+  positionX: number;
+  positionY: number;
 }
 
 export interface WorkExperienceItem {
@@ -70,6 +80,8 @@ export interface ResumeData {
   education: EducationItem[];
   projects: ProjectItem[];
   certifications: CertificationItem[];
+  layout?: ResumeLayout;
+  profileImage?: ProfileImage | null;
   pageSize: PageSize;
   pageMargins?: PageMargins;
   fontSize?: number;

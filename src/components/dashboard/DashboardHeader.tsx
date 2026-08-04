@@ -1,7 +1,6 @@
 import React from 'react';
 import { AuthUser } from '../../services/authService';
-import { isSupabaseConfigured } from '../../lib/supabase';
-import { Plus, LogOut, User, Database, ShieldCheck } from 'lucide-react';
+import { Plus, LogOut } from 'lucide-react';
 
 interface Props {
   user: AuthUser | null;
@@ -24,15 +23,6 @@ export const DashboardHeader: React.FC<Props> = ({ user, onLogout, onCreateNew }
                 <h1 className="text-lg font-bold text-slate-900">
                   Welcome back, {user?.fullName || 'User'}!
                 </h1>
-                {isSupabaseConfigured ? (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    <Database className="w-3 h-3 mr-1" /> Cloud Sync Active
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
-                    Local Storage Mode
-                  </span>
-                )}
               </div>
               <p className="text-xs text-slate-500">
                 {user?.email || 'Manage your professional ATS resumes'}
