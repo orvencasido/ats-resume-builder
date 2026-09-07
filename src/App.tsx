@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ResumeData, SaveStatus, SectionKey } from './types';
 import { authService, AuthUser } from './services/authService';
 import { resumeService } from './services/resumeService';
@@ -14,6 +14,7 @@ import { TechnicalSkillsForm } from './components/builder/TechnicalSkillsForm';
 import { EducationForm } from './components/builder/EducationForm';
 import { ProjectsForm } from './components/builder/ProjectsForm';
 import { CertificationsForm } from './components/builder/CertificationsForm';
+import { AwardsForm } from './components/builder/AwardsForm';
 import { AtsCheckPanel } from './components/builder/AtsCheckPanel';
 import { SectionOrderModal } from './components/builder/SectionOrderModal';
 import { ResumePreview } from './components/preview/ResumePreview';
@@ -27,6 +28,7 @@ import {
   GraduationCap,
   FolderGit2,
   Award,
+  Trophy,
   ArrowRight,
   Plus,
   Layers,
@@ -51,6 +53,34 @@ function AppContent() {
   const saveTimerRef = useRef<number | null>(null);
   const editorScrollRef = useRef<HTMLDivElement | null>(null);
   const formTabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const tabsContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const handleTabsWheel = useCallback((e: WheelEvent) => {
+    if (!tabsContainerRef.current) return;
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      e.preventDefault();
+      let delta = e.deltaY;
+      if (e.deltaMode === 1) {
+        delta *= 28;
+      } else if (e.deltaMode === 2) {
+        delta *= tabsContainerRef.current.clientWidth;
+      }
+      tabsContainerRef.current.scrollLeft += delta;
+    }
+  }, []);
+
+  const setTabsContainerRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (tabsContainerRef.current) {
+        tabsContainerRef.current.removeEventListener('wheel', handleTabsWheel);
+      }
+      tabsContainerRef.current = node;
+      if (node) {
+        node.addEventListener('wheel', handleTabsWheel, { passive: false });
+      }
+    },
+    [handleTabsWheel]
+  );
 
   // Modals state
   const [isAtsCheckOpen, setIsAtsCheckOpen] = useState(false);
@@ -248,6 +278,7 @@ function AppContent() {
     { id: 'education', label: 'Education', icon: GraduationCap },
     { id: 'projects', label: 'Projects', icon: FolderGit2 },
     { id: 'certifications', label: 'Certifications', icon: Award },
+    { id: 'awards', label: 'Awards', icon: Trophy },
   ];
   const activeFormIndex = formTabs.findIndex((tab) => tab.id === activeFormTab);
   const nextFormTab = activeFormIndex >= 0 ? formTabs[activeFormIndex + 1] : null;
@@ -350,7 +381,10 @@ function AppContent() {
               }`}
             >
               {/* Form Navigation Tabs */}
-              <div className="bg-slate-50 border-b border-slate-200 px-4 py-2 overflow-x-auto flex space-x-1 shrink-0 no-scrollbar">
+              <div
+                ref={setTabsContainerRef}
+                className="bg-slate-50 border-b border-slate-200 px-4 py-2 overflow-x-auto overscroll-x-contain flex space-x-1 shrink-0 no-scrollbar"
+              >
                 {formTabs.map((tab) => {
                   const Icon = tab.icon;
                   const isActive = activeFormTab === tab.id;
@@ -483,6 +517,20 @@ function AppContent() {
                         items={activeResume.certifications}
                         onChange={(updated) =>
                           setActiveResume({ ...activeResume, certifications: updated })
+                        }
+                      />
+                    </div>
+                  )}
+
+                  {activeFormTab === 'awards' && (
+                    <div className="space-y-4">
+                      <div className="border-b border-slate-200 pb-3">
+                        <h2 className="text-lg font-bold text-slate-900">Awards</h2>
+                      </div>
+                      <AwardsForm
+                        items={activeResume.awards || []}
+                        onChange={(updated) =>
+                          setActiveResume({ ...activeResume, awards: updated })
                         }
                       />
                     </div>

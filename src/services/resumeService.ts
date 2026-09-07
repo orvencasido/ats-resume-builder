@@ -1,6 +1,7 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import {
   CertificationItem,
+  AwardItem,
   EducationItem,
   PageMargins,
   ProfileImage,
@@ -18,6 +19,7 @@ const DEFAULT_SECTION_ORDER: SectionKey[] = [
   'education',
   'projects',
   'certifications',
+  'awards',
 ];
 
 const DEFAULT_MARGINS: PageMargins = { top: 36, bottom: 36, left: 42, right: 42 };
@@ -44,6 +46,7 @@ const emptyResume = (userId: string, title: string): ResumeData => {
     education: [],
     projects: [],
     certifications: [],
+    awards: [],
     layout: 'classic',
     profileImage: null,
     pageSize: 'A4',
@@ -75,15 +78,22 @@ const mapRowToResume = (row: any): ResumeData => ({
   education: asArray<EducationItem>(row.education),
   projects: asArray<ProjectItem>(row.projects),
   certifications: asArray<CertificationItem>(row.certifications),
+  awards: asArray<AwardItem>(row.awards),
   layout: (row.layout || 'classic') as ResumeLayout,
   profileImage: (row.profile_image || null) as ProfileImage | null,
   pageSize: row.page_size || 'A4',
   pageMargins: row.page_margins || DEFAULT_MARGINS,
   fontSize: Number(row.font_size || 9.8),
   lineHeight: Number(row.line_height || 1.35),
-  sectionOrder: asArray<SectionKey>(row.section_order).length > 0
-    ? asArray<SectionKey>(row.section_order)
-    : DEFAULT_SECTION_ORDER,
+  sectionOrder: (() => {
+    const raw = asArray<SectionKey>(row.section_order);
+    if (raw.length === 0) return DEFAULT_SECTION_ORDER;
+    const merged = [...raw];
+    DEFAULT_SECTION_ORDER.forEach((key) => {
+      if (!merged.includes(key)) merged.push(key);
+    });
+    return merged;
+  })(),
   hiddenSections: asArray<SectionKey>(row.hidden_sections),
   createdAt: row.created_at,
   updatedAt: row.updated_at,
@@ -100,6 +110,7 @@ const mapResumeToRow = (resume: ResumeData, updatedAt: string) => ({
   education: resume.education,
   projects: resume.projects,
   certifications: resume.certifications,
+  awards: resume.awards || [],
   layout: resume.layout || 'classic',
   profile_image: resume.profileImage || null,
   page_size: resume.pageSize,
@@ -256,6 +267,7 @@ export const resumeService = {
       education: original.education.map((item) => ({ ...item, id: crypto.randomUUID() })),
       projects: original.projects.map((item) => ({ ...item, id: crypto.randomUUID() })),
       certifications: original.certifications.map((item) => ({ ...item, id: crypto.randomUUID() })),
+      awards: (original.awards || []).map((item) => ({ ...item, id: crypto.randomUUID() })),
     };
 
     const result = await this.saveResume(duplicated);

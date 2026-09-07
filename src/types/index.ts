@@ -7,7 +7,8 @@ export type SectionKey =
   | 'technicalSkills'
   | 'education'
   | 'projects'
-  | 'certifications';
+  | 'certifications'
+  | 'awards';
 
 export interface PersonalInfo {
   fullName: string;
@@ -62,6 +63,13 @@ export interface CertificationItem {
   sortOrder: number;
 }
 
+export interface AwardItem {
+  id: string;
+  giver: string;
+  title: string;
+  sortOrder: number;
+}
+
 export interface PageMargins {
   top: number;
   bottom: number;
@@ -80,6 +88,7 @@ export interface ResumeData {
   education: EducationItem[];
   projects: ProjectItem[];
   certifications: CertificationItem[];
+  awards?: AwardItem[];
   layout?: ResumeLayout;
   profileImage?: ProfileImage | null;
   pageSize: PageSize;
