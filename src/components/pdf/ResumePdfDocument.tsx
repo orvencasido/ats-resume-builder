@@ -256,6 +256,7 @@ export const ResumePdfDocument: React.FC<Props> = ({ data }) => {
     education,
     projects,
     certifications,
+    awards = [],
     layout = 'classic',
     profileImage,
     pageSize = 'A4',
@@ -268,6 +269,7 @@ export const ResumePdfDocument: React.FC<Props> = ({ data }) => {
       'education',
       'projects',
       'certifications',
+      'awards',
     ],
     hiddenSections = [],
   } = data;
@@ -398,13 +400,33 @@ export const ResumePdfDocument: React.FC<Props> = ({ data }) => {
             <Text style={styles.sectionTitle} minPresenceAhead={25}>CERTIFICATIONS</Text>
             <View style={styles.dividerLine} />
             {certifications.map((cert, idx) => (
-              <View key={cert.id || idx} style={styles.certRow} wrap={false}>
+               <View key={cert.id || idx} style={styles.certRow} wrap={false}>
                 <Text style={styles.bulletPoint}>•</Text>
                 <Text style={styles.skillText}>
                   {cert.giver?.trim() ? (
                     <Text style={styles.certGiverBold}>{cert.giver.trim()}: </Text>
                   ) : null}
                   {cert.title}
+                </Text>
+              </View>
+            ))}
+          </View>
+        );
+
+      case 'awards':
+        if (!awards || awards.length === 0) return null;
+        return (
+          <View key="awards" style={styles.section}>
+            <Text style={styles.sectionTitle} minPresenceAhead={25}>AWARDS</Text>
+            <View style={styles.dividerLine} />
+            {awards.map((award, idx) => (
+              <View key={award.id || idx} style={styles.certRow} wrap={false}>
+                <Text style={styles.bulletPoint}>•</Text>
+                <Text style={styles.skillText}>
+                  {award.giver?.trim() ? (
+                    <Text style={styles.certGiverBold}>{award.giver.trim()}: </Text>
+                  ) : null}
+                  {award.title}
                 </Text>
               </View>
             ))}

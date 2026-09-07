@@ -50,6 +50,7 @@ const SECTION_LABELS: Record<SectionKey, string> = {
   education: 'Education',
   projects: 'Projects',
   certifications: 'Certifications',
+  awards: 'Awards',
 };
 
 const DEFAULT_ORDER: SectionKey[] = [
@@ -58,6 +59,7 @@ const DEFAULT_ORDER: SectionKey[] = [
   'education',
   'projects',
   'certifications',
+  'awards',
 ];
 
 export const SectionOrderModal: React.FC<Props> = ({

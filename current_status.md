@@ -36,6 +36,7 @@ The app stores each resume as one document row with JSONB fields for editable se
 - education
 - projects
 - certifications
+- awards
 - layout and PDF settings
 
 This keeps autosave simple and avoids multi-table rewrites on every edit.

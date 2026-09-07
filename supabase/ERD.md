@@ -29,6 +29,7 @@ erDiagram
     jsonb education
     jsonb projects
     jsonb certifications
+    jsonb awards
     text layout
     jsonb profile_image
     text page_size
