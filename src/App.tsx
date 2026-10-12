@@ -573,6 +573,7 @@ function AppContent() {
             pageMargins={activeResume.pageMargins}
             fontSize={activeResume.fontSize}
             lineHeight={activeResume.lineHeight}
+            sectionSpacing={activeResume.sectionSpacing}
             onUpdateOrder={(newOrder) =>
               setActiveResume({ ...activeResume, sectionOrder: newOrder })
             }
@@ -597,6 +598,9 @@ function AppContent() {
             }
             onUpdateLineHeight={(height) =>
               setActiveResume({ ...activeResume, lineHeight: height })
+            }
+            onUpdateSectionSpacing={(spacing) =>
+              setActiveResume({ ...activeResume, sectionSpacing: spacing })
             }
           />
           {/* ATS Compliance Checker Panel */}

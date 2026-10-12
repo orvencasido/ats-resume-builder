@@ -36,6 +36,7 @@ const emptyResume = (userId: string, title: string): ResumeData => {
     title,
     personalInfo: {
       fullName: '',
+      jobTitle: '',
       email: '',
       phone: '',
       website: '',
@@ -55,6 +56,7 @@ const emptyResume = (userId: string, title: string): ResumeData => {
     lineHeight: 1.35,
     sectionOrder: DEFAULT_SECTION_ORDER,
     hiddenSections: [],
+    sectionSpacing: {},
     createdAt: now,
     updatedAt: now,
   };
@@ -68,6 +70,7 @@ const mapRowToResume = (row: any): ResumeData => ({
   title: row.title || 'Untitled Resume',
   personalInfo: {
     fullName: row.personal_info?.fullName || '',
+    jobTitle: row.personal_info?.jobTitle || '',
     email: row.personal_info?.email || '',
     phone: row.personal_info?.phone || '',
     website: row.personal_info?.website || '',
@@ -95,6 +98,7 @@ const mapRowToResume = (row: any): ResumeData => ({
     return merged;
   })(),
   hiddenSections: asArray<SectionKey>(row.hidden_sections),
+  sectionSpacing: (row.page_margins?.sectionSpacing || row.section_spacing || {}) as Record<string, number>,
   createdAt: row.created_at,
   updatedAt: row.updated_at,
 });
@@ -114,7 +118,10 @@ const mapResumeToRow = (resume: ResumeData, updatedAt: string) => ({
   layout: resume.layout || 'classic',
   profile_image: resume.profileImage || null,
   page_size: resume.pageSize,
-  page_margins: resume.pageMargins || DEFAULT_MARGINS,
+  page_margins: {
+    ...(resume.pageMargins || DEFAULT_MARGINS),
+    sectionSpacing: resume.sectionSpacing || {},
+  },
   font_size: resume.fontSize || 9.8,
   line_height: resume.lineHeight || 1.35,
   section_order: resume.sectionOrder || DEFAULT_SECTION_ORDER,

@@ -12,6 +12,7 @@ export type SectionKey =
 
 export interface PersonalInfo {
   fullName: string;
+  jobTitle?: string;
   email: string;
   phone: string;
   website: string;
@@ -77,6 +78,8 @@ export interface PageMargins {
   right: number;
 }
 
+export type SectionSpacingMap = Partial<Record<SectionKey, number>>;
+
 export interface ResumeData {
   id: string;
   userId: string;
@@ -97,6 +100,7 @@ export interface ResumeData {
   lineHeight?: number;
   sectionOrder: SectionKey[];
   hiddenSections: SectionKey[];
+  sectionSpacing?: SectionSpacingMap;
   createdAt: string;
   updatedAt: string;
 }

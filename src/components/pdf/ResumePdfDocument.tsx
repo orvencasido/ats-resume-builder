@@ -46,9 +46,18 @@ const createPdfStyles = (
       fontWeight: 'bold',
       textTransform: 'uppercase',
       letterSpacing: 0.8,
-      marginBottom: 4,
+      marginBottom: 3,
       color: '#000000',
       textAlign: 'center',
+    },
+    jobTitle: {
+      fontSize: Math.round(baseFontSize * 1.12 * 10) / 10,
+      lineHeight: 1.25,
+      fontWeight: 'normal',
+      color: '#555555',
+      marginBottom: 5,
+      textAlign: 'center',
+      letterSpacing: 0.3,
     },
     contactRow: {
       flexDirection: 'row',
@@ -100,9 +109,18 @@ const createPdfStyles = (
       fontWeight: 'bold',
       textTransform: 'uppercase',
       letterSpacing: 0.8,
-      marginBottom: 5,
+      marginBottom: 3,
       color: '#000000',
       textAlign: 'left',
+    },
+    photoJobTitle: {
+      fontSize: Math.round(baseFontSize * 1.12 * 10) / 10,
+      lineHeight: 1.2,
+      fontWeight: 'normal',
+      color: '#555555',
+      marginBottom: 5,
+      textAlign: 'left',
+      letterSpacing: 0.3,
     },
     photoContactRow: {
       flexDirection: 'row',
@@ -272,6 +290,7 @@ export const ResumePdfDocument: React.FC<Props> = ({ data }) => {
       'awards',
     ],
     hiddenSections = [],
+    sectionSpacing = {},
   } = data;
 
   const styles = createPdfStyles(pageMargins, fontSize, lineHeight);
@@ -306,11 +325,14 @@ export const ResumePdfDocument: React.FC<Props> = ({ data }) => {
   const renderSection = (key: SectionKey) => {
     if (hiddenSections.includes(key)) return null;
 
+    const customMarginTop = sectionSpacing[key] ?? 12;
+    const sectionStyle = [styles.section, { marginTop: customMarginTop }];
+
     switch (key) {
       case 'workExperience':
         if (!workExperiences || workExperiences.length === 0) return null;
         return (
-          <View key="workExperience" style={styles.section}>
+          <View key="workExperience" style={sectionStyle}>
             <Text style={styles.sectionTitle} minPresenceAhead={25}>WORK EXPERIENCE</Text>
             <View style={styles.dividerLine} />
             {workExperiences.map((exp, idx) => (
@@ -336,7 +358,7 @@ export const ResumePdfDocument: React.FC<Props> = ({ data }) => {
       case 'technicalSkills':
         if (!technicalSkills || technicalSkills.length === 0) return null;
         return (
-          <View key="technicalSkills" style={styles.section}>
+          <View key="technicalSkills" style={sectionStyle}>
             <Text style={styles.sectionTitle} minPresenceAhead={25}>TECHNICAL SKILLS</Text>
             <View style={styles.dividerLine} />
             {technicalSkills.map((cat, idx) => (
@@ -356,7 +378,7 @@ export const ResumePdfDocument: React.FC<Props> = ({ data }) => {
       case 'education':
         if (!education || education.length === 0) return null;
         return (
-          <View key="education" style={styles.section}>
+          <View key="education" style={sectionStyle}>
             <Text style={styles.sectionTitle} minPresenceAhead={25}>EDUCATION</Text>
             <View style={styles.dividerLine} />
             {education.map((edu, idx) => (
@@ -374,7 +396,7 @@ export const ResumePdfDocument: React.FC<Props> = ({ data }) => {
       case 'projects':
         if (!projects || projects.length === 0) return null;
         return (
-          <View key="projects" style={styles.section}>
+          <View key="projects" style={sectionStyle}>
             <Text style={styles.sectionTitle} minPresenceAhead={25}>PROJECTS</Text>
             <View style={styles.dividerLine} />
             {projects.map((proj, idx) => (
@@ -396,7 +418,7 @@ export const ResumePdfDocument: React.FC<Props> = ({ data }) => {
       case 'certifications':
         if (!certifications || certifications.length === 0) return null;
         return (
-          <View key="certifications" style={styles.section}>
+          <View key="certifications" style={sectionStyle}>
             <Text style={styles.sectionTitle} minPresenceAhead={25}>CERTIFICATIONS</Text>
             <View style={styles.dividerLine} />
             {certifications.map((cert, idx) => (
@@ -416,7 +438,7 @@ export const ResumePdfDocument: React.FC<Props> = ({ data }) => {
       case 'awards':
         if (!awards || awards.length === 0) return null;
         return (
-          <View key="awards" style={styles.section}>
+          <View key="awards" style={sectionStyle}>
             <Text style={styles.sectionTitle} minPresenceAhead={25}>AWARDS</Text>
             <View style={styles.dividerLine} />
             {awards.map((award, idx) => (
@@ -452,6 +474,10 @@ export const ResumePdfDocument: React.FC<Props> = ({ data }) => {
     <View style={styles.headerContainer}>
       <Text style={styles.name}>{personalInfo.fullName || 'YOUR NAME'}</Text>
 
+      {personalInfo.jobTitle?.trim() ? (
+        <Text style={styles.jobTitle}>{personalInfo.jobTitle.trim()}</Text>
+      ) : null}
+
       {contactParts.length > 0 && (
         <View style={styles.contactRow}>
           {contactParts.map((item, index) => (
@@ -480,6 +506,10 @@ export const ResumePdfDocument: React.FC<Props> = ({ data }) => {
       <View style={styles.photoHeaderTop}>
         <View style={styles.photoHeaderContent}>
           <Text style={styles.photoName}>{personalInfo.fullName || 'YOUR NAME'}</Text>
+
+          {personalInfo.jobTitle?.trim() ? (
+            <Text style={styles.photoJobTitle}>{personalInfo.jobTitle.trim()}</Text>
+          ) : null}
 
           {contactParts.length > 0 && (
             <View style={styles.photoContactRow}>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PersonalInfo, ProfileImage } from '../../types';
-import { User, Mail, Phone, Globe, ImagePlus, Trash2, MoveHorizontal, MoveVertical, ZoomIn } from 'lucide-react';
+import { User, Briefcase, Mail, Phone, Globe, ImagePlus, Trash2, MoveHorizontal, MoveVertical, ZoomIn } from 'lucide-react';
 
 interface Props {
   data: PersonalInfo;
@@ -138,6 +138,23 @@ export const PersonalDetailsForm: React.FC<Props> = ({
               placeholder="e.g. ORVEN CASIDO"
               className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
               required
+            />
+          </div>
+        </div>
+
+        {/* Job Title (Optional) */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+            Job Title <span className="text-slate-400 font-normal lowercase">(optional)</span>
+          </label>
+          <div className="relative">
+            <Briefcase className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+            <input
+              type="text"
+              value={data.jobTitle || ''}
+              onChange={(e) => handleChange('jobTitle', e.target.value)}
+              placeholder="e.g. Full Stack Developer"
+              className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 transition-colors"
             />
           </div>
         </div>
